@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: book-rating
+  datasource:
+    url: jdbc:postgresql://localhost:5432/book-service-db
+    username: book_app
+    password: app123
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        default_schema: book_rating
