@@ -1,0 +1,2 @@
+ALTER TABLE book
+    ADD COLUMN release_date DATE NOT NULL;

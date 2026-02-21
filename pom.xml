@@ -71,6 +71,16 @@
 
     <build>
 
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>flyway-maven-plugin</artifactId>
+                    <version>11.12.0</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -78,6 +88,56 @@
             </plugin>
         </plugins>
 
+
     </build>
+
+
+    <profiles>
+        <profile>
+            <id>db-migrate</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.flywaydb</groupId>
+                        <artifactId>flyway-maven-plugin</artifactId>
+                        <configuration>
+                            <cleanDisabled>false</cleanDisabled>
+                            <locations>
+                                <location>filesystem:src/main/resources/db/migration</location>
+                            </locations>
+                            <schemas>
+                                <schema>book_rating</schema>
+                            </schemas>
+                            <defaultSchema>book_rating</defaultSchema>
+                            <url>jdbc:postgresql://localhost:5432/book-service-db</url>
+                            <user>application</user>
+                            <password>topsecret123</password>
+                            <baselineOnMigrate>true</baselineOnMigrate>
+                            <placeholders>
+                                <SCHEMA>book_rating</SCHEMA>
+                                <APP_USER>book_app</APP_USER>
+                                <ADMIN_USER>book_admin</ADMIN_USER>
+                                <APP_PASSWORD>app123</APP_PASSWORD>
+                                <ADMIN_PASSWORD>admin123</ADMIN_PASSWORD>
+                            </placeholders>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.postgresql</groupId>
+                                <artifactId>postgresql</artifactId>
+                                <version>42.7.7</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.flywaydb</groupId>
+                                <artifactId>flyway-database-postgresql</artifactId>
+                                <version>11.12.0</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 
 </project>
