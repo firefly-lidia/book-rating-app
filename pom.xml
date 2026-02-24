@@ -123,7 +123,51 @@
                             <cleanDisabled>false</cleanDisabled>
                             <locations>
                                 <location>filesystem:src/main/resources/db/migration</location>
-                                <location>filesystem:db/sample</location>
+                                <location>filesystem:src/main/resources/db/sample-data</location>
+                            </locations>
+                            <schemas>
+                                <schema>book_rating</schema>
+                            </schemas>
+                            <defaultSchema>book_rating</defaultSchema>
+                            <url>jdbc:postgresql://localhost:5432/book-service-db</url>
+                            <user>application</user>
+                            <password>topsecret123</password>
+                            <baselineOnMigrate>true</baselineOnMigrate>
+                            <placeholders>
+                                <SCHEMA>book_rating</SCHEMA>
+                                <APP_USER>book_app</APP_USER>
+                                <ADMIN_USER>book_admin</ADMIN_USER>
+                                <APP_PASSWORD>app123</APP_PASSWORD>
+                                <ADMIN_PASSWORD>admin123</ADMIN_PASSWORD>
+                            </placeholders>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.postgresql</groupId>
+                                <artifactId>postgresql</artifactId>
+                                <version>42.7.7</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.flywaydb</groupId>
+                                <artifactId>flyway-database-postgresql</artifactId>
+                                <version>11.12.0</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>db-sample-data</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.flywaydb</groupId>
+                        <artifactId>flyway-maven-plugin</artifactId>
+                        <configuration>
+                            <cleanDisabled>true</cleanDisabled>
+                            <locations>
+                                <location>filesystem:src/main/resources/db/sample-data</location>
                             </locations>
                             <schemas>
                                 <schema>book_rating</schema>

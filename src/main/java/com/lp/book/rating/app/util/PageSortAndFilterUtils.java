@@ -1,19 +1,20 @@
 package com.lp.book.rating.app.util;
 
+import com.lp.book.rating.app.exception.InvalidPaginationCriteriaException;
 import com.lp.book.rating.app.exception.InvalidSortingCriteriaException;
 import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.lang.NonNull;
-import org.apache.commons.lang3.ArrayUtils;
 
 @UtilityClass
 public class PageSortAndFilterUtils {
 
     private static final int MAX_ALLOWED_PAGE_SIZE = 10;
 
-    public static PageRequest getPageRequest(int pageNumber, int pageSize, @NonNull String sort) {
-        return PageRequest.of(pageNumber, pageSize, getSort(sort));
+    public static PageRequest getPageRequest(int limit, int offset, @NonNull String sort) {
+        return PageRequest.of(getPage(limit, offset), limit, getSort(sort));
     }
 
     private static Sort getSort(@NonNull String sort) {
@@ -28,6 +29,22 @@ public class PageSortAndFilterUtils {
         } catch (Exception ex) {
             throw new InvalidSortingCriteriaException("Invalid sorting expression, format should be field.direction", ex);
         }
+    }
+
+    private static int getPage(int limit, int offset) {
+        if (limit < 1) {
+            throw new InvalidPaginationCriteriaException("Invalid limit, cannot be less than 1");
+        }
+
+        if (limit > MAX_ALLOWED_PAGE_SIZE) {
+            throw new InvalidPaginationCriteriaException("Invalid limit, cannot be greater than " + MAX_ALLOWED_PAGE_SIZE);
+        }
+
+        if (offset < 0) {
+            throw new InvalidPaginationCriteriaException("Invalid offset, cannot be less than 0");
+        }
+
+        return offset / limit;
     }
 
 }

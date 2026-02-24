@@ -35,7 +35,7 @@ public class User extends AbstractAuditableEntity<Long> {
 
     @NotBlank
     @Column(name = "password", nullable = false)
-    private String password;
+    private String hashedPassword;
 
     @NotNull
     @Enumerated(EnumType.STRING)
