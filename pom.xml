@@ -123,6 +123,7 @@
                             <cleanDisabled>false</cleanDisabled>
                             <locations>
                                 <location>filesystem:src/main/resources/db/migration</location>
+                                <location>filesystem:db/sample</location>
                             </locations>
                             <schemas>
                                 <schema>book_rating</schema>
