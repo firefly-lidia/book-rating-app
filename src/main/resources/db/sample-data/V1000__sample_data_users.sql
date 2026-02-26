@@ -2,7 +2,7 @@ SET search_path = book_rating, public;
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- TRUNCATE TABLE rating, book, users RESTART IDENTITY CASCADE;
+-- TRUNCATE TABLE user RESTART IDENTITY CASCADE;
 
 INSERT INTO users (id, email, password, role, name, surname, nickname, age, rec_version, created_by, created_ts) VALUES
                                                                                                                      (1 , 'admin1@example.com', crypt('admin1pass1', gen_salt('bf', 11)), 'ADMIN', 'Alice', 'Admin', 'admin1', 30, 0, 'seed', now()),

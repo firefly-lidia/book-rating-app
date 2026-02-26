@@ -6,6 +6,7 @@ CREATE TABLE book (
     author       TEXT NOT NULL,
     genre        TEXT NOT NULL,
     publication_year INTEGER NOT NULL,
+    description   TEXT NOT NULL ,
     isbn         VARCHAR(20) NOT NULL,
     publisher     TEXT NOT NULL,
     language      VARCHAR(2) NOT NULL,

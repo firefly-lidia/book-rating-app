@@ -1,0 +1,18 @@
+SET search_path = book_rating, public;
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- TRUNCATE TABLE book RESTART IDENTITY CASCADE;
+
+INSERT INTO book (id,title,author,genre,publication_year,description,isbn,publisher,language,number_of_pages,price,currency,rec_version,created_by,created_ts,archived,release_date) VALUES (1,'Book 1','Author 1','Fantasy',1980,'A magical journey through ancient lands.','9780306406157','Publisher 1','EN',500,25,'USD',0,'seed',now(),false,'1980-05-12');
+INSERT INTO book (id,title,author,genre,publication_year,description,isbn,publisher,language,number_of_pages,price,currency,rec_version,created_by,created_ts,archived,release_date) VALUES (2,'Book 2','Author 2','Science Fiction',1995,'A thrilling adventure in a distant galaxy.','978-3-16-148410-0','Publisher 2','EN',320,18.99,'USD',0,'seed',now(),true,'1995-11-23');
+INSERT INTO book (id,title,author,genre,publication_year,description,isbn,publisher,language,number_of_pages,price,currency,rec_version,created_by,created_ts,archived,release_date) VALUES (3,'Book 3','Author 3','Fantasy',2001,'A tale of dragons, heroes, and destiny.','0-306-40615-2','Publisher 3','EN',410,22.5,'USD',0,'seed',now(),false,'2001-07-15');
+INSERT INTO book (id,title,author,genre,publication_year,description,isbn,publisher,language,number_of_pages,price,currency,rec_version,created_by,created_ts,archived,release_date) VALUES (4,'Book 4','Author 4','Mystery',2010,'A detective unravels a puzzling crime.','1-56619-909-3','Publisher 4','EN',275,15.75,'USD',0,'seed',now(),true,'2010-03-09');
+INSERT INTO book (id,title,author,genre,publication_year,description,isbn,publisher,language,number_of_pages,price,currency,rec_version,created_by,created_ts,archived,release_date) VALUES (5,'Book 5','Author 5','Non-Fiction',2018,'Insights into the wonders of our world.','9781861972712','Publisher 5','EN',350,30,'USD',0,'seed',now(),false,'2018-08-21');
+INSERT INTO book (id,title,author,genre,publication_year,description,isbn,publisher,language,number_of_pages,price,currency,rec_version,created_by,created_ts,archived,release_date) VALUES (6,'Book 6','Author 6','Biography',1999,'The inspiring story of a remarkable life.','978-0-545-01022-1','Publisher 6','EN',290,19.99,'USD',0,'seed',now(),true,'1999-12-01');
+INSERT INTO book (id,title,author,genre,publication_year,description,isbn,publisher,language,number_of_pages,price,currency,rec_version,created_by,created_ts,archived,release_date) VALUES (7,'Book 7','Author 7','Historical',1985,'A vivid portrait of a bygone era.','0-19-852663-6','Publisher 7','EN',410,24.5,'USD',0,'seed',now(),false,'1985-04-17');
+INSERT INTO book (id,title,author,genre,publication_year,description,isbn,publisher,language,number_of_pages,price,currency,rec_version,created_by,created_ts,archived,release_date) VALUES (8,'Book 8','Author 8','Romance',2020,'A heartwarming story of love and hope.','9780471117094','Publisher 8','EN',330,17.5,'USD',0,'seed',now(),true,'2020-09-30');
+INSERT INTO book (id,title,author,genre,publication_year,description,isbn,publisher,language,number_of_pages,price,currency,rec_version,created_by,created_ts,archived,release_date) VALUES (9,'Book 9','Author 9','Thriller',2005,'A race against time to stop a disaster.','978-0-262-13472-9','Publisher 9','EN',280,21,'USD',0,'seed',now(),false,'2005-02-14');
+INSERT INTO book (id,title,author,genre,publication_year,description,isbn,publisher,language,number_of_pages,price,currency,rec_version,created_by,created_ts,archived,release_date) VALUES (10,'Book 10','Author 10','Children',2012,'A delightful tale for young readers.','0-201-53082-1','Publisher 10','EN',150,12.99,'USD',0,'seed',now(),true,'2012-06-05');
+
+SELECT setval('book_seq', (SELECT max(id) FROM book));
