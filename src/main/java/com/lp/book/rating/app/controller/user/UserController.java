@@ -7,6 +7,7 @@ import com.lp.book.rating.app.service.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,7 +31,7 @@ public class UserController {
     }
 
     @Valid
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<PaginatedResponse<List<UserResponse>>> getAll(@RequestParam(required = false, defaultValue = DEFAULT_LIMIT) int limit,
                                                                       @RequestParam(required = false, defaultValue = DEFAULT_OFFSET) int offset,
@@ -42,8 +43,8 @@ public class UserController {
     }
 
     @Valid
-//    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/{userId}/ratings")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/{userId}")
     public ResponseEntity<UserResponse> get(@PathVariable @Valid @PositiveOrZero Long userId) {
         return ResponseEntity.ok(userService.getById(userId));
     }

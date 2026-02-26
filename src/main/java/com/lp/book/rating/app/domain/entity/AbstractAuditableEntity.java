@@ -39,7 +39,7 @@ public abstract class AbstractAuditableEntity<ID extends Serializable> implement
 
     @CreatedDate
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    @Column(name = "created_date", nullable = false, updatable = false)
+    @Column(name = "created_ts", nullable = false, updatable = false)
     private LocalDateTime createdDate;
 
     @LastModifiedBy
@@ -48,7 +48,7 @@ public abstract class AbstractAuditableEntity<ID extends Serializable> implement
 
     @LastModifiedDate
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    @Column(name = "modified_date")
+    @Column(name = "modified_ts")
     private LocalDateTime lastModifiedDate;
 
     @Override

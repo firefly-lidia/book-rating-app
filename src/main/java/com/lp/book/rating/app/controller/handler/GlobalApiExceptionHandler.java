@@ -16,8 +16,8 @@ import static com.lp.book.rating.app.util.ProblemDetailUtils.enrich;
 public class GlobalApiExceptionHandler {
 
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ProblemDetail> handleUserNotFoundException(UserNotFoundException ex, HttpServletRequest request) {
-        return new ResponseEntity<>(enrich(build(HttpStatus.NOT_FOUND, "User Not Found", ex.getMessage(), "not-found"), request), HttpStatus.NOT_FOUND);
+    public ProblemDetail handleUserNotFoundException(UserNotFoundException ex, HttpServletRequest request) {
+        return enrich(build(HttpStatus.NOT_FOUND, "User Not Found", ex.getMessage(), "not-found"), request);
     }
 
 }
