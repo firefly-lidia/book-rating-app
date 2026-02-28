@@ -2,7 +2,9 @@ package com.lp.book.rating.app.controller.user;
 
 import com.lp.book.rating.app.controller.response.PageInfo;
 import com.lp.book.rating.app.controller.response.PaginatedResponse;
+import com.lp.book.rating.app.controller.user.dto.UserRatingResponse;
 import com.lp.book.rating.app.controller.user.dto.UserResponse;
+import com.lp.book.rating.app.service.RatingService;
 import com.lp.book.rating.app.service.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -25,17 +27,19 @@ public class UserController {
     private static final String DEFAULT_SORTING = "id.asc";
 
     private final UserService userService;
+    private final RatingService ratingService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, RatingService ratingService) {
         this.userService = userService;
+        this.ratingService = ratingService;
     }
 
     @Valid
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<PaginatedResponse<List<UserResponse>>> getAll(@RequestParam(required = false, defaultValue = DEFAULT_LIMIT) int limit,
-                                                                      @RequestParam(required = false, defaultValue = DEFAULT_OFFSET) int offset,
-                                                                      @RequestParam(required = false, defaultValue = DEFAULT_SORTING) String sort) {
+                                                                        @RequestParam(required = false, defaultValue = DEFAULT_OFFSET) int offset,
+                                                                        @RequestParam(required = false, defaultValue = DEFAULT_SORTING) String sort) {
         var page = userService.getAll(limit, offset, sort);
         var pageInfo = PageInfo.of(page.getPageable(), page.getTotalPages(), page.getTotalElements());
 
@@ -47,6 +51,20 @@ public class UserController {
     @GetMapping("/{userId}")
     public UserResponse get(@PathVariable @Valid @PositiveOrZero Long userId) {
         return userService.getById(userId);
+    }
+
+    @Valid
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/{userId}/ratings")
+    public ResponseEntity<PaginatedResponse<List<UserRatingResponse>>> getUserRatings(@PathVariable @Valid @PositiveOrZero Long userId,
+                                                                                      @RequestParam(required = false, defaultValue = DEFAULT_LIMIT) int limit,
+                                                                                      @RequestParam(required = false, defaultValue = DEFAULT_OFFSET) int offset,
+                                                                                      @RequestParam(required = false, defaultValue = DEFAULT_SORTING) String sort) {
+        var page = ratingService.getAllByUserIdAndBookId(userId, limit, offset, sort);
+
+        var pageInfo = PageInfo.of(page.getPageable(), page.getTotalPages(), page.getTotalElements());
+
+        return ResponseEntity.ok(PaginatedResponse.of(page.getContent(), pageInfo));
     }
 
 }
