@@ -1,5 +1,6 @@
 package com.lp.book.rating.app.domain.entity;
 
+import com.lp.book.rating.app.domain.enums.BookGenre;
 import com.lp.book.rating.app.domain.enums.Currency;
 import com.lp.book.rating.app.domain.enums.Language;
 import jakarta.persistence.Column;
@@ -19,6 +20,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.validator.constraints.ISBN;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -43,9 +45,9 @@ public class Book extends AbstractAuditableEntity<Long> {
     @Column(name = "description", nullable = false)
     private String description;
 
-    @NotBlank
+    @Enumerated(EnumType.STRING)
     @Column(name = "genre", nullable = false)
-    private String genre;
+    private BookGenre genre;
 
     @NotBlank
     @Column(name = "author", nullable = false)
@@ -59,6 +61,7 @@ public class Book extends AbstractAuditableEntity<Long> {
 
     @NotBlank
     @Column(name = "isbn", length = 20, nullable = false, unique = true)
+    @ISBN
     private String isbn;
 
     @NotNull
