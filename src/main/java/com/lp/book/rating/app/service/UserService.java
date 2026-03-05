@@ -7,6 +7,7 @@ import com.lp.book.rating.app.util.PageSortAndFilterUtils;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.data.domain.Page;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +35,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserResponse getById(@Valid @PositiveOrZero Long id) {
+    public UserResponse getById(@NonNull Long id) {
         return userRepository.findById(id).map(userDto -> new UserResponse(
             userDto.getId(),
             userDto.getEmail(),
