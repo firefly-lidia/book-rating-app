@@ -8,7 +8,6 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -17,6 +16,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.domain.Auditable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.lang.NonNull;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

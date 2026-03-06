@@ -1,4 +1,4 @@
-package com.lp.book.rating.app.controller.auth.registration;
+package com.lp.book.rating.app.controller.auth.dto.registration;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;

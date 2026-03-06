@@ -3,11 +3,10 @@ package com.lp.book.rating.app.service;
 import com.lp.book.rating.app.controller.user.dto.UserRatingResponse;
 import com.lp.book.rating.app.domain.repository.RatingRepository;
 import com.lp.book.rating.app.domain.repository.UserRepository;
-import com.lp.book.rating.app.exception.UserNotFoundException;
 import com.lp.book.rating.app.util.PageSortAndFilterUtils;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

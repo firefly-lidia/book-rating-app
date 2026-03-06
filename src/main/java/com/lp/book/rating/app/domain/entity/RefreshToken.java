@@ -2,12 +2,9 @@ package com.lp.book.rating.app.domain.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
@@ -27,15 +24,15 @@ import java.util.UUID;
 @ToString
 @SequenceGenerator(name = "refresh_token_id_generator", sequenceName = "refresh_token_seq", allocationSize = 1)
 @Table(name = "refresh_token")
-public class RefreshToken {
+public class RefreshToken extends AbstractAuditableEntity<Long>{
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "refresh_token_id_generator")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @NotNull
+    @Column(name = "user_id")
+    private Long userId;
 
     @NotNull
     @Column
@@ -52,5 +49,9 @@ public class RefreshToken {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
+
+    @NotNull
+    @Column
+    private Boolean revoked;
 
 }

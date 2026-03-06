@@ -2,8 +2,28 @@ package com.lp.book.rating.app.domain.repository;
 
 import com.lp.book.rating.app.domain.entity.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
+
+
+    @Query(value = "select pg_advisory_xact_lock(:uid)", nativeQuery = true)
+    void lockUser(@Param("uid") Long userId);
+
+    @Modifying
+    @Query(value = """
+            update RefreshToken rt
+                set rt.revoked = true,
+                    rt.lastModifiedBy = :by,
+                    rt.version = rt.version + 1,
+                    rt.lastModifiedDate = CURRENT_TIMESTAMP
+                where rt.userId = :userId
+                    and rt.revoked = false
+        """)
+    void revokeActiveByUserId(long userId, String by);
+
 }

@@ -1,5 +1,6 @@
 package com.lp.book.rating.app.security;
 
+import com.lp.book.rating.app.security.config.JwtConfig;
 import com.lp.book.rating.app.security.config.UserDetailServiceConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +14,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
-@Import({UserDetailServiceConfig.class})
+@Import({UserDetailServiceConfig.class, JwtConfig.class})
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity

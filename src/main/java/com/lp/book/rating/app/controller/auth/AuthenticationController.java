@@ -1,7 +1,9 @@
 package com.lp.book.rating.app.controller.auth;
 
-import com.lp.book.rating.app.controller.auth.registration.RegisterRequest;
-import com.lp.book.rating.app.controller.auth.registration.RegisterResponse;
+import com.lp.book.rating.app.controller.auth.dto.TokenPairResponse;
+import com.lp.book.rating.app.controller.auth.dto.login.LoginRequest;
+import com.lp.book.rating.app.controller.auth.dto.registration.RegisterRequest;
+import com.lp.book.rating.app.controller.auth.dto.registration.RegisterResponse;
 import com.lp.book.rating.app.service.AuthenticationService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -30,5 +32,12 @@ public class AuthenticationController {
         return new RegisterResponse(authenticationService.register(request));
     }
 
+    @Valid
+    @PostMapping("/login")
+    public TokenPairResponse login(@RequestBody @Valid LoginRequest request) {
+        var token = authenticationService.login(request);
+
+        return new TokenPairResponse(token.accessToken(), token.refreshToken());
+    }
 
 }

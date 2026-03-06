@@ -21,3 +21,22 @@ spring:
     user:
       name: admin
       password: admin123
+
+
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+      hibernate:
+        SQL: DEBUG
+
+
+app:
+  security:
+    jwt:
+      issuer: "book-rating-service"
+      access-ttl: PT15M
+      refresh-ttl: P14D
+      private-pem-path: jwt-private.pem
