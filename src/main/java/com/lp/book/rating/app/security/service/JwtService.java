@@ -43,6 +43,20 @@ public class JwtService {
         return new Token(access, refresh.refreshToken());
     }
 
+    public Token refresh(@NonNull String refreshToken) {
+        var userId = refreshTokenService.revoke(refreshToken);
+        var refresh = refreshTokenService.issue(userId);
+
+        var userInfo = userService.findById(userId);
+        var access = issueAccess(userInfo.getEmail(), userInfo.getRole().toString(), refresh.rjti().toString(), userId);
+
+        return new Token(access, refresh.refreshToken());
+    }
+
+    public void revoke(@NonNull String refreshToken) {
+        refreshTokenService.revoke(refreshToken);
+    }
+
     private String issueAccess(String email, String role, String linkedRefreshJti, Long userId) {
         var now = Instant.now();
         var claims = JwtClaimsSet.builder()

@@ -2,6 +2,8 @@ package com.lp.book.rating.app.security.service;
 
 import com.lp.book.rating.app.domain.dto.RefreshTokenContainer;
 import com.lp.book.rating.app.domain.dto.UserDto;
+import com.lp.book.rating.app.domain.entity.Role;
+import com.lp.book.rating.app.exception.InvalidTokenException;
 import com.lp.book.rating.app.exception.TokenValidationException;
 import com.lp.book.rating.app.security.config.JwtProperties;
 import com.lp.book.rating.app.service.RefreshTokenService;
@@ -25,7 +27,9 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -113,6 +117,70 @@ public class JwtServiceUTest {
         assertThat(iat).isNotNull();
         assertThat(exp).isNotNull();
         assertThat(Duration.between(iat, exp)).isEqualTo(Duration.parse("PT15M"));
+    }
+
+    @Test
+    void refresh_success() {
+        var rjti = UUID.randomUUID();
+        var refreshToken = "refreshToken";
+        var newRefreshToken = "newRefreshToken";
+        var accessToken = "accessToken";
+        var issuer = "book-issuer";
+
+        when(properties.issuer()).thenReturn(accessToken);
+        when(properties.accessTtl()).thenReturn("PT15M");
+
+        when(refreshTokenService.revoke(refreshToken)).thenReturn(USER_ID);
+        when(refreshTokenService.issue(USER_ID)).thenReturn(new RefreshTokenContainer(newRefreshToken, rjti));
+
+        when(userService.findById(USER_ID)).thenReturn(userDto);
+        when(userDto.getRole()).thenReturn(Role.USER);
+        when(userDto.getEmail()).thenReturn(EMAIL);
+
+        when(encoder.encode(any(JwtEncoderParameters.class))).thenReturn(jwt);
+        when(jwt.getTokenValue()).thenReturn(accessToken);
+
+        var token = jwtService.refresh(refreshToken);
+
+        assertThat(token.accessToken()).isEqualTo(accessToken);
+        assertThat(token.refreshToken()).isEqualTo(newRefreshToken);
+    }
+
+    @Test
+    void refresh_fail() {
+        var refreshToken = "refreshToken";
+        var errorMessage = "Refresh token has been expired or revoked";
+
+        when(refreshTokenService.revoke(refreshToken)).thenThrow(new InvalidTokenException(errorMessage));
+
+        assertThatThrownBy(() -> jwtService.refresh(refreshToken))
+            .isInstanceOf(InvalidTokenException.class)
+            .hasMessage(errorMessage);
+
+        verify(refreshTokenService, times(0)).issue(USER_ID);
+        verifyNoInteractions(userService);
+        verifyNoInteractions(encoder);
+    }
+
+    @Test
+    void revoke_success() {
+        var refreshToken = "refreshToken";
+
+        jwtService.revoke(refreshToken);
+
+        verify(refreshTokenService).revoke(refreshToken);
+    }
+
+    @Test
+    void revoke_fail() {
+        var refreshToken = "refreshToken";
+        var errorMessage = "Refresh token has been expired or revoked";
+
+        when(refreshTokenService.revoke(refreshToken)).thenThrow(new InvalidTokenException(errorMessage));
+
+        assertThatThrownBy(() -> jwtService.revoke(refreshToken))
+            .isInstanceOf(InvalidTokenException.class)
+            .hasMessage(errorMessage);
     }
 
 }

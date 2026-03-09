@@ -10,6 +10,7 @@ import com.lp.book.rating.app.security.domain.Token;
 import com.lp.book.rating.app.security.domain.UserDetails;
 import com.lp.book.rating.app.security.service.JwtService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -61,6 +62,16 @@ public class AuthenticationService {
         var role = principal.getAuthorities().iterator().next().getAuthority().replace("ROLE_", "");
 
         return jwtService.issue(loginRequest.email(), role, principal.getId());
+    }
+
+    @Transactional
+    public Token refreshToken(@NonNull String refreshToken) {
+        return jwtService.refresh(refreshToken);
+    }
+
+    @Transactional
+    public void revokeToken(@NonNull String refreshToken) {
+        jwtService.revoke(refreshToken);
     }
 
 

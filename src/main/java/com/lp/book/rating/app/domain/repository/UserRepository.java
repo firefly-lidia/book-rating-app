@@ -5,6 +5,7 @@ import com.lp.book.rating.app.domain.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
@@ -12,6 +13,9 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
+
+    @Query("select u from User u where u.id = :id")
+    Optional<UserDto> findByid(@NonNull Long id);
 
     Optional<UserDto> findByEmail(@NonNull String email);
 

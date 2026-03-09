@@ -5,11 +5,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 @Repository
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
 
+    Optional<RefreshToken> findByHashedToken(@NonNull String hashedToken);
 
     @Query(value = "select pg_advisory_xact_lock(:uid)", nativeQuery = true)
     void lockUser(@Param("uid") Long userId);
@@ -25,5 +29,18 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
                     and rt.revoked = false
         """)
     void revokeActiveByUserId(long userId, String by);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(value = """
+            update RefreshToken rt
+                set rt.revoked = true,
+                    rt.lastModifiedBy = :by,
+                    rt.lastModifiedDate = CURRENT_TIMESTAMP,
+                    rt.version = rt.version + 1
+                where rt.hashedToken = :hash
+                    and rt.revoked = false
+                    and rt.expiresAt > CURRENT_TIMESTAMP
+        """)
+    int revokeIfActive(@Param("hash") String hash, @Param("by") String by);
 
 }

@@ -1,11 +1,10 @@
 package com.lp.book.rating.app.service;
 
 import com.lp.book.rating.app.controller.user.dto.UserResponse;
+import com.lp.book.rating.app.domain.dto.UserDto;
 import com.lp.book.rating.app.domain.repository.UserRepository;
 import com.lp.book.rating.app.exception.UserNotFoundException;
 import com.lp.book.rating.app.util.PageSortAndFilterUtils;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.data.domain.Page;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -18,6 +17,11 @@ public class UserService {
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public UserDto findById(@NonNull Long id) {
+        return userRepository.findByid(id).orElseThrow(() -> new UserNotFoundException(id));
     }
 
     @Transactional(readOnly = true)

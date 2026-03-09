@@ -3,6 +3,7 @@ package com.lp.book.rating.app.service;
 import com.lp.book.rating.app.domain.dto.RefreshTokenContainer;
 import com.lp.book.rating.app.domain.entity.RefreshToken;
 import com.lp.book.rating.app.domain.repository.RefreshTokenRepository;
+import com.lp.book.rating.app.exception.InvalidTokenException;
 import com.lp.book.rating.app.exception.TokenValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,6 +48,23 @@ public class RefreshTokenService {
 
         return new RefreshTokenContainer(rawToken, token.getJti());
     }
+
+    @Transactional
+    public Long revoke(@NonNull String refreshToken) {
+        var hash = calculateHash(refreshToken);
+
+        int changed = refreshTokenRepository.revokeIfActive(hash, "system");
+        if (changed == 0) {
+            throw new InvalidTokenException("Invalid refresh token");
+        }
+
+        log.info("Refresh token has been revoked");
+
+        return refreshTokenRepository.findByHashedToken(hash)
+            .map(RefreshToken::getUserId)
+            .orElseThrow(() -> new InvalidTokenException("Invalid refresh token"));
+    }
+
 
     private RefreshToken createToken(@NonNull String rawToken, @NonNull Long userId) {
         var hashedToken = calculateHash(rawToken);
