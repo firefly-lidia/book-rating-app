@@ -1,5 +1,6 @@
 package com.lp.book.rating.app.controller.handler;
 
+import com.lp.book.rating.app.exception.InvalidETagFormatException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,8 @@ public class GlobalApiExceptionHandler {
 
     @ExceptionHandler({
         HandlerMethodValidationException.class,
-        ConstraintViolationException.class})
+        ConstraintViolationException.class,
+        InvalidETagFormatException.class})
     public ProblemDetail handleInvalidBody(Exception ex, HttpServletRequest req) {
         return enrich(build(HttpStatus.BAD_REQUEST, "Validation Failed", ex.getMessage(), "validation-failed"), req);
     }

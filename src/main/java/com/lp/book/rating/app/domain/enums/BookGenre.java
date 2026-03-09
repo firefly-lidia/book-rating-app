@@ -14,6 +14,7 @@ public enum BookGenre {
     BIOGRAPHY,
     HISTORICAL,
     CHILDREN,
-    COMICS
+    COMICS,
+    PROGRAMMING
 
 }
