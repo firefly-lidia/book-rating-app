@@ -12,4 +12,8 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     Optional<Book> findByTitleIgnoreCase(@NonNull String title);
 
+    Optional<Book> findByIsbn(@NonNull String isbn);
+
+    Long id(Long id);
+
 }

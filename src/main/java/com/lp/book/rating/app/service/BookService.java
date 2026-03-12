@@ -2,10 +2,13 @@ package com.lp.book.rating.app.service;
 
 import com.lp.book.rating.app.controller.book.dto.BookResponse;
 import com.lp.book.rating.app.controller.book.dto.CreateBookRequest;
+import com.lp.book.rating.app.controller.book.dto.PatchBookRequest;
 import com.lp.book.rating.app.domain.entity.Book;
 import com.lp.book.rating.app.domain.repository.BookRepository;
 import com.lp.book.rating.app.exception.BookAlreadyExistsException;
 import com.lp.book.rating.app.exception.BookNotFoundException;
+import com.lp.book.rating.app.exception.InvalidETagFormatException;
+import com.lp.book.rating.app.exception.WrongIdIsbnPairException;
 import com.lp.book.rating.app.util.PageSortAndFilterUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -63,6 +66,54 @@ public class BookService {
             savedBook.getCurrency().name(),
             savedBook.getArchived(),
             savedBook.getVersion());
+    }
+
+    @Transactional
+    public BookResponse patch(@NonNull Long id, @NonNull PatchBookRequest patchMovieRequest,
+                              @NonNull Integer version) {
+        var book = bookRepository.findById(id).orElseThrow(() -> new BookNotFoundException(id));
+
+        if (version.compareTo(book.getVersion()) != 0) {
+            throw new InvalidETagFormatException("ETag version mismatch");
+        }
+
+        patchMovieRequest.isbn().ifPresent(isbn -> {
+            var foundBook = bookRepository.findByIsbn(isbn);
+
+            if (foundBook.isPresent() && !foundBook.get().getId().equals(id)) {
+                throw new WrongIdIsbnPairException("Id of updated book does not match id of found book with same ISBN");
+            }
+        });
+
+        patchMovieRequest.isbn().ifPresent(isbn -> book.setIsbn(isbn));
+        patchMovieRequest.title().ifPresent(book::setTitle);
+        patchMovieRequest.description().ifPresent(book::setDescription);
+        patchMovieRequest.author().ifPresent(book::setAuthor);
+        patchMovieRequest.genre().ifPresent(book::setGenre);
+        patchMovieRequest.publisher().ifPresent(book::setPublisher);
+        patchMovieRequest.releaseDate().ifPresent(book::setReleaseDate);
+        patchMovieRequest.language().ifPresent(book::setLanguage);
+        patchMovieRequest.numberOfPages().ifPresent(book::setNumberOfPages);
+        patchMovieRequest.price().ifPresent(book::setPrice);
+        patchMovieRequest.currency().ifPresent(book::setCurrency);
+        patchMovieRequest.archived().ifPresent(book::setArchived);
+
+        var updatedBook = bookRepository.saveAndFlush(book);
+
+        return new BookResponse(updatedBook.getId(),
+            updatedBook.getTitle(),
+            updatedBook.getDescription(),
+            updatedBook.getAuthor(),
+            updatedBook.getGenre().name(),
+            updatedBook.getPublisher(),
+            updatedBook.getReleaseDate(),
+            updatedBook.getIsbn(),
+            updatedBook.getLanguage().name(),
+            updatedBook.getNumberOfPages(),
+            updatedBook.getPrice(),
+            updatedBook.getCurrency().name(),
+            updatedBook.getArchived(),
+            updatedBook.getVersion());
     }
 
     @Transactional(readOnly = true)
