@@ -6,6 +6,7 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
@@ -20,7 +21,8 @@ public class GlobalApiExceptionHandler {
     @ExceptionHandler({
         HandlerMethodValidationException.class,
         ConstraintViolationException.class,
-        InvalidETagFormatException.class})
+        InvalidETagFormatException.class,
+        BadCredentialsException.class})
     public ProblemDetail handleInvalidBody(Exception ex, HttpServletRequest req) {
         return enrich(build(HttpStatus.BAD_REQUEST, "Validation Failed", ex.getMessage(), "validation-failed"), req);
     }

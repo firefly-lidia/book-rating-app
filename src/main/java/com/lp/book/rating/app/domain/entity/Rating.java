@@ -38,8 +38,8 @@ public class Rating extends AbstractAuditableEntity<Long> {
     private String description;
 
     @NotNull
-    @Column(name = "archieved", nullable = false)
-    private Boolean archieved;
+    @Column(name = "archived", nullable = false)
+    private Boolean archived;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
