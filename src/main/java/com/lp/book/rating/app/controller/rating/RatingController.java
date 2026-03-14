@@ -5,6 +5,8 @@ import com.lp.book.rating.app.controller.rating.dto.RatingRequest;
 import com.lp.book.rating.app.controller.rating.dto.RatingResponse;
 import com.lp.book.rating.app.service.RatingService;
 import com.lp.book.rating.app.util.ETagUtils;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static org.springframework.http.HttpHeaders.IF_MATCH;
 
+@Tag(name = "Manage rating", description = "Create, modify or remove rating for given movie")
 @Validated
 @RestController
 @RequestMapping("/api/v1/book/{bookId}/rating")
+@SecurityRequirement(name = "bearerAuth")
 public class RatingController {
 
     private final RatingService ratingService;

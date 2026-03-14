@@ -8,6 +8,7 @@ import com.lp.book.rating.app.controller.response.PageInfo;
 import com.lp.book.rating.app.controller.response.PaginatedResponse;
 import com.lp.book.rating.app.service.BookService;
 import com.lp.book.rating.app.util.ETagUtils;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.http.HttpHeaders;
@@ -29,6 +30,7 @@ import java.util.List;
 @Validated
 @RestController
 @RequestMapping("/api/v1/books")
+@SecurityRequirement(name = "bearerAuth")
 public class BookController {
 
     private static final String DEFAULT_LIMIT = "10";

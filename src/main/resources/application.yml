@@ -43,3 +43,14 @@ app:
   rating:
     bayes:
       m: 50
+
+springdoc:
+  group-configs:
+    - group: Book Management API V1
+      packages-to-scan: com.lp.book.rating.app.controller.book
+    - group: Rating Management API V1
+      packages-to-scan: com.lp.book.rating.app.controller.rating
+    - group: User Auth Management API V1
+      packages-to-scan: com.lp.book.rating.app.controller.auth
+    - group: User Management API V1
+      packages-to-scan: com.lp.book.rating.app.controller.user

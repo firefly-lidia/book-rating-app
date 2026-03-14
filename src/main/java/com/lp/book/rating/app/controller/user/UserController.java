@@ -6,6 +6,7 @@ import com.lp.book.rating.app.controller.user.dto.UserRatingResponse;
 import com.lp.book.rating.app.controller.user.dto.UserResponse;
 import com.lp.book.rating.app.service.RatingService;
 import com.lp.book.rating.app.service.UserService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/api/v1/users")
+@SecurityRequirement(name = "bearerAuth")
 public class UserController {
 
     private static final String DEFAULT_LIMIT = "10";
