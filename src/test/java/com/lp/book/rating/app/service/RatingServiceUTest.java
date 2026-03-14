@@ -8,7 +8,9 @@ import com.lp.book.rating.app.domain.repository.BookRepository;
 import com.lp.book.rating.app.domain.repository.RatingRepository;
 import com.lp.book.rating.app.domain.repository.UserRepository;
 import com.lp.book.rating.app.exception.BookNotFoundException;
+import com.lp.book.rating.app.exception.InvalidETagFormatException;
 import com.lp.book.rating.app.exception.RatingAlreadyExistsException;
+import com.lp.book.rating.app.exception.RatingNotFoundException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +30,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,6 +39,7 @@ public class RatingServiceUTest {
     private static final Long BOOK_ID = 1L;
     private static final Long USER_ID = 2L;
     private static final Long RATING_ID = 3L;
+    private static final Integer ETAG_VERSION = 1;
 
     @Mock
     private RatingRepository ratingRepository;
@@ -139,5 +143,55 @@ public class RatingServiceUTest {
 
         SecurityContextHolder.setContext(securityContext);
     }
+
+    @Test
+    void delete_success() {
+        mockJwt();
+
+        when(ratingRepository.findByBookIdAndUserId(BOOK_ID, USER_ID)).thenReturn(Optional.of(rating));
+
+        when(rating.getId()).thenReturn(RATING_ID);
+        when(rating.getVersion()).thenReturn(ETAG_VERSION);
+        when(rating.getUser()).thenReturn(user);
+        when(user.getId()).thenReturn(USER_ID);
+        when(rating.getBook()).thenReturn(book);
+        when(book.getId()).thenReturn(BOOK_ID);
+
+        ratingService.delete(BOOK_ID, ETAG_VERSION);
+
+        verify(ratingRepository).deleteById(RATING_ID);
+    }
+
+    @Test
+    void delete_fail_user_not_found() {
+        assertThatThrownBy(() -> ratingService.delete(BOOK_ID, ETAG_VERSION))
+            .isInstanceOf(BadCredentialsException.class)
+            .hasMessage("User is not authenticated");
+    }
+
+    @Test
+    void delete_fail_rating_not_found() {
+        mockJwt();
+
+        when(ratingRepository.findByBookIdAndUserId(BOOK_ID, USER_ID)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> ratingService.delete(BOOK_ID, ETAG_VERSION))
+            .isInstanceOf(RatingNotFoundException.class)
+            .hasMessage("Rating not found for book ID 1 and user ID 2");
+    }
+
+    @Test
+    void delete_fail_etag_version_differs() {
+        mockJwt();
+
+        when(ratingRepository.findByBookIdAndUserId(BOOK_ID, USER_ID)).thenReturn(Optional.of(rating));
+
+        when(rating.getVersion()).thenReturn(ETAG_VERSION + 1);
+
+        assertThatThrownBy(() -> ratingService.delete(BOOK_ID, ETAG_VERSION))
+            .isInstanceOf(InvalidETagFormatException.class)
+            .hasMessage("ETag version mismatch");
+    }
+
 
 }

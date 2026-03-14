@@ -3,16 +3,21 @@ package com.lp.book.rating.app.controller.rating;
 import com.lp.book.rating.app.controller.rating.dto.RatingRequest;
 import com.lp.book.rating.app.controller.rating.dto.RatingResponse;
 import com.lp.book.rating.app.service.RatingService;
+import com.lp.book.rating.app.util.ETagUtils;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import static org.springframework.http.HttpHeaders.IF_MATCH;
 
 @Validated
 @RestController
@@ -36,6 +41,17 @@ public class RatingController {
     @GetMapping
     public ResponseEntity<RatingResponse> get(@PathVariable @PositiveOrZero Long bookId) {
         return ResponseEntity.ok(ratingService.getByBookId(bookId));
+    }
+
+    @Valid
+    @DeleteMapping
+    public ResponseEntity<Void> delete(@PathVariable @PositiveOrZero Long bookId,
+                                       @RequestHeader(IF_MATCH) String ifMatch) {
+        var version = ETagUtils.extractETag(ifMatch);
+
+        ratingService.delete(bookId, version);
+
+        return ResponseEntity.noContent().build();
     }
 
 }

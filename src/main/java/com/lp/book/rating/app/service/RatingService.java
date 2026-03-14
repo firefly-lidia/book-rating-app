@@ -8,6 +8,7 @@ import com.lp.book.rating.app.domain.repository.BookRepository;
 import com.lp.book.rating.app.domain.repository.RatingRepository;
 import com.lp.book.rating.app.domain.repository.UserRepository;
 import com.lp.book.rating.app.exception.BookNotFoundException;
+import com.lp.book.rating.app.exception.InvalidETagFormatException;
 import com.lp.book.rating.app.exception.RatingAlreadyExistsException;
 import com.lp.book.rating.app.exception.RatingNotFoundException;
 import com.lp.book.rating.app.util.PageSortAndFilterUtils;
@@ -74,6 +75,22 @@ public class RatingService {
             savedRating.getDescription(),
             savedRating.getCreatedDate().orElseThrow(),
             savedRating.getVersion());
+    }
+
+    @Transactional
+    public void delete(@NonNull Long bookId, @NonNull Integer version) {
+        var userId = getAuthorizedUserId();
+        var rating = ratingRepository.findByBookIdAndUserId(bookId, userId).orElseThrow(() -> new RatingNotFoundException(bookId, userId));
+
+        if (!rating.getVersion().equals(version)) {
+            throw new InvalidETagFormatException("ETag version mismatch");
+        }
+
+        assert rating.getId() != null;
+
+        log.info("Deleted rating for userId={} and bookId={}", rating.getUser().getId(), rating.getBook().getId());
+
+        ratingRepository.deleteById(rating.getId());
     }
 
     private Long getAuthorizedUserId() {
