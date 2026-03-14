@@ -1,5 +1,6 @@
 package com.lp.book.rating.app.service;
 
+import com.lp.book.rating.app.controller.rating.dto.PatchRatingRequest;
 import com.lp.book.rating.app.controller.rating.dto.RatingRequest;
 import com.lp.book.rating.app.controller.rating.dto.RatingResponse;
 import com.lp.book.rating.app.controller.user.dto.UserRatingResponse;
@@ -91,6 +92,33 @@ public class RatingService {
         log.info("Deleted rating for userId={} and bookId={}", rating.getUser().getId(), rating.getBook().getId());
 
         ratingRepository.deleteById(rating.getId());
+    }
+
+    @Transactional
+    public RatingResponse patch(@NonNull Long bookId,
+                                @NonNull PatchRatingRequest patchRatingRequest,
+                                @NonNull Integer version) {
+        var userId = getAuthorizedUserId();
+        var rating = ratingRepository.findByBookIdAndUserId(bookId, userId).orElseThrow(() -> new RatingNotFoundException(bookId, userId));
+
+        if (version.compareTo(rating.getVersion()) != 0) {
+            throw new InvalidETagFormatException("ETag version mismatch");
+        }
+
+        patchRatingRequest.description().ifPresent(rating::setDescription);
+        patchRatingRequest.score().ifPresent(rating::setScore);
+
+        log.info("Patching rating for userId={} and bookId={}", rating.getUser().getId(), rating.getBook().getId());
+        log.debug("Patch request: {}", patchRatingRequest);
+
+        var updatedRating = ratingRepository.saveAndFlush(rating);
+
+        return new RatingResponse(updatedRating.getId(),
+            updatedRating.getBook().getId(),
+            updatedRating.getScore(),
+            updatedRating.getDescription(),
+            updatedRating.getCreatedDate().orElseThrow(),
+            updatedRating.getVersion());
     }
 
     private Long getAuthorizedUserId() {

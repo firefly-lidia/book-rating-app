@@ -9,7 +9,6 @@ import com.lp.book.rating.app.domain.enums.Language;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.hibernate.validator.constraints.ISBN;
 
@@ -26,7 +25,7 @@ public record PatchBookRequest(
     Optional<BookGenre> genre,
     Optional<@Size(max = 150) String> publisher,
     @JsonProperty("release_date") Optional<LocalDate> releaseDate,
-    Optional<@NotBlank @ISBN String> isbn,
+    Optional<@ISBN String> isbn,
     Optional<Language> language,
     @JsonProperty("number_of_pages") Optional<@Max(2500) Integer> numberOfPages,
     Optional<@DecimalMin("0.00") @Digits(integer = 18, fraction = 2) BigDecimal> price,

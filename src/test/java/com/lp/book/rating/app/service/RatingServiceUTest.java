@@ -1,5 +1,6 @@
 package com.lp.book.rating.app.service;
 
+import com.lp.book.rating.app.controller.rating.dto.PatchRatingRequest;
 import com.lp.book.rating.app.controller.rating.dto.RatingRequest;
 import com.lp.book.rating.app.domain.entity.Book;
 import com.lp.book.rating.app.domain.entity.Rating;
@@ -30,6 +31,10 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyShort;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -52,6 +57,9 @@ public class RatingServiceUTest {
 
     @Mock
     private RatingRequest ratingRequest;
+
+    @Mock
+    private PatchRatingRequest patchRatingRequest;
 
     @Mock
     private Book book;
@@ -193,5 +201,66 @@ public class RatingServiceUTest {
             .hasMessage("ETag version mismatch");
     }
 
+    @Test
+    void patch_success() {
+        mockJwt();
+
+        when(ratingRepository.findByBookIdAndUserId(BOOK_ID, USER_ID)).thenReturn(Optional.of(rating));
+
+        when(rating.getVersion()).thenReturn(ETAG_VERSION);
+        when(rating.getDescription()).thenReturn("description");
+        when(rating.getScore()).thenReturn((short) 7);
+        when(rating.getCreatedDate()).thenReturn(Optional.of(LocalDateTime.now()));
+        doCallRealMethod().when(rating).setDescription(anyString());
+        when(rating.getUser()).thenReturn(user);
+        when(user.getId()).thenReturn(USER_ID);
+        when(rating.getBook()).thenReturn(book);
+        when(book.getId()).thenReturn(BOOK_ID);
+
+        when(patchRatingRequest.score()).thenReturn(Optional.empty());
+        when(patchRatingRequest.description()).thenReturn(Optional.of("updated description"));
+
+        when(ratingRepository.saveAndFlush(any(Rating.class))).thenAnswer(inv -> {
+            Rating rating = inv.getArgument(0);
+            rating.setId(RATING_ID);
+            return rating;
+        });
+
+        ratingService.patch(BOOK_ID, patchRatingRequest, ETAG_VERSION);
+
+        verify(rating).setDescription("updated description");
+        verify(rating, times(0)).setScore(anyShort());
+    }
+
+    @Test
+    void patch_fail_user_not_found() {
+        assertThatThrownBy(() -> ratingService.patch(BOOK_ID, patchRatingRequest, ETAG_VERSION))
+            .isInstanceOf(BadCredentialsException.class)
+            .hasMessage("User is not authenticated");
+    }
+
+    @Test
+    void patch_fail_rating_not_found() {
+        mockJwt();
+
+        when(ratingRepository.findByBookIdAndUserId(BOOK_ID, USER_ID)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> ratingService.patch(BOOK_ID, patchRatingRequest, ETAG_VERSION))
+            .isInstanceOf(RatingNotFoundException.class)
+            .hasMessage("Rating not found for book ID 1 and user ID 2");
+    }
+
+    @Test
+    void patch_fail_etag_version_differs() {
+        mockJwt();
+
+        when(ratingRepository.findByBookIdAndUserId(BOOK_ID, USER_ID)).thenReturn(Optional.of(rating));
+
+        when(rating.getVersion()).thenReturn(ETAG_VERSION + 1);
+
+        assertThatThrownBy(() -> ratingService.patch(BOOK_ID, patchRatingRequest, ETAG_VERSION))
+            .isInstanceOf(InvalidETagFormatException.class)
+            .hasMessage("ETag version mismatch");
+    }
 
 }

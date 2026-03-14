@@ -7,16 +7,16 @@ import lombok.experimental.UtilityClass;
 public class ETagUtils {
 
     public static String buildETag(int version) {
-        return "\"v" + version + "\"";
+        return "v" + version;
     }
 
     public static  Integer extractETag(String etag) {
-        if (etag.isBlank() || !etag.startsWith("\"v") || !etag.endsWith("\"")) {
+        if (etag.isBlank() || !etag.startsWith("v") || !etag.endsWith("")) {
             throw new InvalidETagFormatException("Invalid ETag format");
         }
 
         try {
-            return Integer.parseInt(etag.substring(1, etag.length() - 1));
+            return Integer.parseInt(etag.substring(1, etag.length()));
         } catch (NumberFormatException e) {
             throw new InvalidETagFormatException("Invalid ETag format");
         }

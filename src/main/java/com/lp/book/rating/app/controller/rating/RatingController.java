@@ -1,5 +1,6 @@
 package com.lp.book.rating.app.controller.rating;
 
+import com.lp.book.rating.app.controller.rating.dto.PatchRatingRequest;
 import com.lp.book.rating.app.controller.rating.dto.RatingRequest;
 import com.lp.book.rating.app.controller.rating.dto.RatingResponse;
 import com.lp.book.rating.app.service.RatingService;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,7 +25,7 @@ import static org.springframework.http.HttpHeaders.IF_MATCH;
 @RestController
 @RequestMapping("/api/v1/book/{bookId}/rating")
 public class RatingController {
-    
+
     private final RatingService ratingService;
 
     public RatingController(RatingService ratingService) {
@@ -52,6 +54,22 @@ public class RatingController {
         ratingService.delete(bookId, version);
 
         return ResponseEntity.noContent().build();
+    }
+
+
+    @Valid
+    @PatchMapping
+    public ResponseEntity<RatingResponse> patch(@PathVariable @PositiveOrZero Long bookId,
+                                                @RequestHeader(IF_MATCH) String ifMatch,
+                                                @Valid @RequestBody PatchRatingRequest patchRatingRequest) {
+
+        var version = ETagUtils.extractETag(ifMatch);
+
+        var rating = ratingService.patch(bookId, patchRatingRequest, version);
+
+        return ResponseEntity.ok()
+            .eTag(ETagUtils.buildETag(rating.version()))
+            .body(rating);
     }
 
 }

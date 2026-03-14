@@ -73,12 +73,12 @@ public class BookController {
     @Valid
     @PatchMapping("/{bookId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<BookResponse> patch(@PathVariable @PositiveOrZero Long id,
+    public ResponseEntity<BookResponse> patch(@PathVariable @PositiveOrZero Long bookId,
                                               @RequestHeader(HttpHeaders.IF_MATCH) String ifMatch,
                                               @Valid @RequestBody PatchBookRequest request) {
         var version = ETagUtils.extractETag(ifMatch);
 
-        var book = bookService.patch(id, request, version);
+        var book = bookService.patch(bookId, request, version);
 
         return ResponseEntity.ok()
             .eTag(ETagUtils.buildETag(book.version()))
