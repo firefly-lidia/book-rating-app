@@ -3,6 +3,7 @@ package com.lp.book.rating.app.service;
 import com.lp.book.rating.app.controller.book.dto.BookResponse;
 import com.lp.book.rating.app.controller.book.dto.CreateBookRequest;
 import com.lp.book.rating.app.controller.book.dto.PatchBookRequest;
+import com.lp.book.rating.app.controller.book.dto.TopRatedBookResponse;
 import com.lp.book.rating.app.domain.entity.Book;
 import com.lp.book.rating.app.domain.repository.BookRepository;
 import com.lp.book.rating.app.exception.BookAlreadyExistsException;
@@ -11,6 +12,7 @@ import com.lp.book.rating.app.exception.InvalidETagFormatException;
 import com.lp.book.rating.app.exception.WrongIdIsbnPairException;
 import com.lp.book.rating.app.util.PageSortAndFilterUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 public class BookService {
+
+    @Value("${app.rating.bayes.m:50}")
+    private int mDefault;
 
     private final BookRepository bookRepository;
 
@@ -137,6 +142,7 @@ public class BookService {
             book.getVersion()));
     }
 
+    @Transactional(readOnly = true)
     public BookResponse getById(@NonNull Long bookId) {
         return bookRepository.findById(bookId).map(book -> new BookResponse(
             book.getId(),
@@ -153,6 +159,22 @@ public class BookService {
             book.getCurrency().name(),
             book.getArchived(),
             book.getVersion())).orElseThrow(() -> new BookNotFoundException(bookId));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<TopRatedBookResponse> getTopRated(int limit, int offset, int minVotes) {
+        var pageRequest = PageSortAndFilterUtils.getPageRequest(limit, offset);
+
+        return bookRepository.findTopRated(mDefault, minVotes, pageRequest).map(
+            movie -> new TopRatedBookResponse(movie.getId(),
+                movie.getTitle(),
+                movie.getGenre(),
+                movie.getAuthor(),
+                movie.getReleaseDate(),
+                movie.getAvgScore(),
+                movie.getRatingsCount(),
+                movie.getRankScore()
+            ));
     }
 
 }

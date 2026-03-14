@@ -40,3 +40,6 @@ app:
       access-ttl: PT15M
       refresh-ttl: P14D
       private-pem-path: jwt-private.pem
+  rating:
+    bayes:
+      m: 50

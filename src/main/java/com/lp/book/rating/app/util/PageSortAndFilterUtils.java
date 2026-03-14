@@ -13,6 +13,10 @@ public class PageSortAndFilterUtils {
 
     private static final int MAX_ALLOWED_PAGE_SIZE = 10;
 
+    public static PageRequest getPageRequest(int limit, int offset) {
+        return PageRequest.of(getPage(limit, offset), limit);
+    }
+
     public static PageRequest getPageRequest(int limit, int offset, @NonNull String sort) {
         return PageRequest.of(getPage(limit, offset), limit, getSort(sort));
     }

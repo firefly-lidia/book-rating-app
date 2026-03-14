@@ -3,6 +3,7 @@ package com.lp.book.rating.app.controller.book;
 import com.lp.book.rating.app.controller.book.dto.BookResponse;
 import com.lp.book.rating.app.controller.book.dto.CreateBookRequest;
 import com.lp.book.rating.app.controller.book.dto.PatchBookRequest;
+import com.lp.book.rating.app.controller.book.dto.TopRatedBookResponse;
 import com.lp.book.rating.app.controller.response.PageInfo;
 import com.lp.book.rating.app.controller.response.PaginatedResponse;
 import com.lp.book.rating.app.service.BookService;
@@ -33,6 +34,7 @@ public class BookController {
     private static final String DEFAULT_LIMIT = "10";
     private static final String DEFAULT_OFFSET = "0";
     private static final String DEFAULT_SORTING = "releaseDate.asc";
+    private static final String MIN_VOTES = "5";
 
     private final BookService bookService;
 
@@ -83,6 +85,18 @@ public class BookController {
         return ResponseEntity.ok()
             .eTag(ETagUtils.buildETag(book.version()))
             .body(book);
+    }
+
+    @Valid
+    @GetMapping("/top-rated")
+    public ResponseEntity<PaginatedResponse<List<TopRatedBookResponse>>> topRated(
+        @RequestParam(required = false, defaultValue = DEFAULT_LIMIT) int limit,
+        @RequestParam(required = false, defaultValue = DEFAULT_OFFSET) int offset,
+        @RequestParam(required = false, defaultValue = MIN_VOTES) int minVotes) {
+        var page = bookService.getTopRated(limit, offset, minVotes);
+        var pageInfo = PageInfo.of(page.getPageable(), page.getTotalPages(), page.getTotalElements());
+
+        return ResponseEntity.ok(PaginatedResponse.of(page.getContent(), pageInfo));
     }
 
 }
