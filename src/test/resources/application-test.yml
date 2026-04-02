@@ -18,6 +18,9 @@ spring:
   jpa:
     properties:
       hibernate.default_schema: book_rating
+  data:
+    redis:
+      url: redis://default:secret@localhost:6379/0
 
 app:
   security:

@@ -26,6 +26,9 @@ spring:
       fail-on-unknown-properties: true
   flyway:
     enabled: false
+  data:
+    redis:
+      url: redis://default:secret@localhost:6379/0
 
 
 

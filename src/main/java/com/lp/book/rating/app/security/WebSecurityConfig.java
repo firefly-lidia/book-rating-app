@@ -1,7 +1,10 @@
 package com.lp.book.rating.app.security;
 
+import com.lp.book.rating.app.limiter.AuthApiRateLimitFilter;
+import com.lp.book.rating.app.limiter.JwtApiRateLimitFilter;
 import com.lp.book.rating.app.security.config.JwtConfig;
 import com.lp.book.rating.app.security.config.UserDetailServiceConfig;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -49,6 +52,21 @@ public class WebSecurityConfig {
         grantAuthConverter.setAuthorityPrefix("ROLE_");
         converter.setJwtGrantedAuthoritiesConverter(grantAuthConverter);
         return converter;
+    }
+
+    //https://docs.spring.io/spring-security/reference/servlet/architecture.html#_declaring_your_filter_as_a_bean
+    @Bean
+    public FilterRegistrationBean<JwtApiRateLimitFilter> jwtApiRateLimit(JwtApiRateLimitFilter jwtApiRateLimitFilter) {
+        var registration = new FilterRegistrationBean<>(jwtApiRateLimitFilter);
+        registration.setEnabled(false);
+        return registration;
+    }
+
+    @Bean
+    public FilterRegistrationBean<AuthApiRateLimitFilter> globalApiRateLimit(AuthApiRateLimitFilter authApiRateLimitFilter) {
+        var registration = new FilterRegistrationBean<>(authApiRateLimitFilter);
+        registration.setEnabled(false);
+        return registration;
     }
 
 }
