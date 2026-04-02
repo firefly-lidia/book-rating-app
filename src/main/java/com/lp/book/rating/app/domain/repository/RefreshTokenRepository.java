@@ -8,12 +8,23 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
 
     Optional<RefreshToken> findByHashedToken(@NonNull String hashedToken);
+
+    @Query("""
+            select t from RefreshToken t
+            where t.userId = :userId
+              and t.revoked = false
+              and t.expiresAt > :now
+            order by t.issuedAt asc
+            """)
+    List<RefreshToken> findActiveByUser(@NonNull Long userId, @NonNull Instant now);
 
     @Query(value = "select pg_advisory_xact_lock(:uid)", nativeQuery = true)
     void lockUser(@Param("uid") Long userId);
