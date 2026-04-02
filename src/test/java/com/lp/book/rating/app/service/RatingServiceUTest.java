@@ -138,7 +138,7 @@ public class RatingServiceUTest {
 
         assertThatThrownBy(() -> ratingService.create(BOOK_ID, ratingRequest))
             .isInstanceOf(RatingAlreadyExistsException.class)
-            .hasMessage("Rating already exists, you can update you rating");
+            .hasMessage("Rating already exists, you can update your rating");
     }
 
     private void mockJwt() {

@@ -57,7 +57,7 @@ public class RatingService {
         var userId = getAuthorizedUserId();
 
         ratingRepository.findByBookIdAndUserId(bookId, userId).ifPresent(existingRating -> {
-            throw new RatingAlreadyExistsException("Rating already exists, you can update you rating");
+            throw new RatingAlreadyExistsException("Rating already exists, you can update your rating");
         });
 
         var rating = new Rating();
