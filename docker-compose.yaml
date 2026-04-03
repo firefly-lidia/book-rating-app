@@ -1,0 +1,76 @@
+services:
+  book-postgres:
+    image: postgres:17-alpine
+    container_name: book-postgres
+    ports: ["5432:5432"]
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: book-service-db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d book-service-db"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  book-redis:
+    image: redis:7-alpine
+    container_name: book-redis
+    command: ["redis-server","--save","60","1","--appendonly","yes","--loglevel","warning","--requirepass","secret"]
+    ports: ["6379:6379"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "secret", "PING"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+
+  flyway-migrate:
+    image: flyway/flyway:10-alpine
+    depends_on:
+      book-postgres:
+        condition: service_healthy
+    restart: "no"
+    volumes:
+      - ./src/main/resources/db/migration:/flyway/sql/migration:ro
+      - ./src/main/resources/db/sample-data:/flyway/sql/sample-data:ro
+    command:
+      - "-connectRetries=60"
+      - "-url=jdbc:postgresql://book-postgres:5432/book-service-db"
+      - "-user=postgres"
+      - "-password=postgres"
+      - "-schemas=book_rating"
+      - "-defaultSchema=book_rating"
+      - "-locations=filesystem:/flyway/sql/migration"
+      - "-placeholders.SCHEMA=book_rating"
+      - "-placeholders.APP_USER=book_app"
+      - "-placeholders.ADMIN_USER=book_admin"
+      - "-placeholders.APP_PASSWORD=app123"
+      - "-placeholders.ADMIN_PASSWORD=admin123"
+      - "migrate"
+
+  book-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: book-app
+    depends_on:
+      book-postgres: { condition: service_healthy }
+      book-redis:    { condition: service_healthy }
+      flyway-migrate: { condition: service_completed_successfully }
+    ports: ["8080:8080"]
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://book-postgres:5432/book-service-db?currentSchema=book_rating
+      SPRING_DATASOURCE_USERNAME: book_app
+      SPRING_DATASOURCE_PASSWORD: app123
+      SPRING_FLYWAY_ENABLED: "false"
+      SPRING_DATA_REDIS_URL: redis://:secret@book-redis:6379/0
+      REDIS_URL: redis://:secret@book-redis:6379/0
+
+volumes:
+  pgdata:
+  redisdata:

@@ -1,0 +1,56 @@
+services:
+  flyway-clean:
+    image: flyway/flyway:10-alpine
+    container_name: book-flyway-clean
+    depends_on:
+      book-postgres: { condition: service_healthy }
+    restart: "no"
+    volumes:
+      - ./src/main/resources/db/migration:/flyway/sql/migration:ro
+      - ./src/main/resources/db/sample-data:/flyway/sql/sample-data:ro
+    command:
+      - "-X"
+      - "-connectRetries=60"
+      - "-url=jdbc:postgresql://book-postgres:5432/book-service-db"
+      - "-user=postgres"
+      - "-password=postgres"
+      - "-schemas=book_rating"
+      - "-defaultSchema=book_rating"
+      - "-cleanDisabled=false"
+      - "clean"
+
+  flyway-seed:
+    image: flyway/flyway:10-alpine
+    container_name: book-flyway-seed
+    depends_on:
+      book-postgres: { condition: service_healthy }
+      flyway-clean:   { condition: service_completed_successfully }
+    restart: "no"
+    volumes:
+      - ./src/main/resources/db/migration:/flyway/sql/migration:ro
+      - ./src/main/resources/db/sample-data:/flyway/sql/sample-data:ro
+    command:
+      - "-X"
+      - "-connectRetries=60"
+      - "-url=jdbc:postgresql://book-postgres:5432/book-service-db"
+      - "-user=postgres"
+      - "-password=postgres"
+      - "-schemas=book_rating"
+      - "-defaultSchema=book_rating"
+      - "-locations=filesystem:/flyway/sql/migration,filesystem:/flyway/sql/sample-data"
+      - "-placeholders.SCHEMA=book_rating"
+      - "-placeholders.APP_USER=book_app"
+      - "-placeholders.ADMIN_USER=book_admin"
+      - "-placeholders.APP_PASSWORD=app123"
+      - "-placeholders.ADMIN_PASSWORD=admin123"
+      - "migrate"
+
+  flyway-migrate:
+    entrypoint: ["true"]
+    command: []
+
+  book-app:
+    depends_on:
+      book-postgres: { condition: service_healthy }
+      book-redis:    { condition: service_healthy }
+      flyway-seed:    { condition: service_completed_successfully }
